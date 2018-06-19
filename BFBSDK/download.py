@@ -126,29 +126,46 @@ def extractFilesThatSatisfyPred(zipFile, pred):
         if pred(name):
             zipFile.extract(name)
 
+def isMultiOS(zipFile):
+    for name in zipFile.namelist():
+        if "Carthage" in name:
+            return True
+    return False
+
+def moveFrameworks(zipFile, pred, frameworks):
+    for framework in frameworks:
+        if os.path.isfile(framework):
+            shutil.rmtree(framework)
+    
+    for name in zipFile.namelist():
+        if pred(name):
+            filename = os.path.basename(os.path.normpath(name))
+            for framework in frameworks:
+                if filename == framework:
+                    print(name)
+                    os.rename(name, framework)
+
 def download(frameworks, githubRelease):
     httpFile = HttpFile(githubRelease)
     
+    print("Downloading zip dir")
+    file = zipfile.ZipFile(httpFile)
+    mutliOS = isMultiOS(file)
+    
     def pred(filename):
-        if "iOS" in filename and not "dSYM" in filename:
+        if (not mutliOS or "iOS" in filename) and not "dSYM" in filename:
             for framework in frameworks:
                 if framework in filename:
                     return True
         return False
-    
-    print("Downloading zip dir")
-    file = zipfile.ZipFile(httpFile)
     
     print("Downloading block that satisfies predicate")
     loadZipRangeForItemsSatisfyingPred(file, httpFile, pred)
     
     print("Extracting files")
     extractFilesThatSatisfyPred(file, pred)
-    
-    for framework in frameworks:
-        if os.path.isfile(framework):
-            shutil.rmtree(framework)
-        os.rename("Carthage/Build/iOS/" + framework, framework)
+
+    moveFrameworks(file, pred, frameworks)
 
 def linkToZip(manifest):
     if "release" in manifest:
