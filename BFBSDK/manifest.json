@@ -1,0 +1,7 @@
+{
+    
+    "repo": "facebook/facebook-ios-sdk",
+    "filenamePrefix": "FacebookSDKs-",
+    "frameworks": ["FBSDKLoginKit.framework", "FBSDKCoreKit.framework"]
+    
+}
