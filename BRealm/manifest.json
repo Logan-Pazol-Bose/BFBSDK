@@ -1,7 +1,0 @@
-{
-    
-    "repo": "realm/realm-cocoa",
-    "filenamePrefix": "Carthage",
-    "frameworks": ["Realm.framework", "RealmSwift.framework"]
-    
-}
